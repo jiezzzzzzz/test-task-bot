@@ -5,7 +5,7 @@ from random import randint
 import sqlite3
 import xlsxwriter
 from sqlalchemy.orm import Session
-from sqlalchemy.sql import text
+from datetime import datetime
 
 token = '5770384309:AAGfLGofyPfvFKyhFemQFF_lJV_T5km0IW0'
 bot = telebot.TeleBot(token)
@@ -32,7 +32,7 @@ def registration(message):
     name = message.text
     with Session(engine) as session:
         newUser = Users(fio=name,
-                     datar='11.08.1984',
+                     datar=datetime(2012, 3, 3, 10, 10, 10),
                      id_role=randint(1, 2))
 
         session.add(newUser)
