@@ -4,6 +4,7 @@ from models import *
 from random import randint
 import sqlite3
 import xlsxwriter
+from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 
 token = '5770384309:AAGfLGofyPfvFKyhFemQFF_lJV_T5km0IW0'
@@ -29,20 +30,26 @@ def callback_inline(call):
 
 def registration(message):
     name = message.text
-    with engine.connect() as conn:
-        conn.execute(insert(text('users'), ["fio", "datar", "id_role"]).values({"fio": name, "datar": '11.08.1984', "id_role": randint(1, 2)}))
-        conn.commit()
+    with Session(engine) as session:
+        newUser = Users(fio=name,
+                     datar='11.08.1984',
+                     id_role=randint(1, 2))
+
+        session.add(newUser)
+        session.commit()
     workbook = xlsxwriter.Workbook('users.xlsx')
     worksheet = workbook.add_worksheet()
-    fio = 'SELECT fio FROM users'
-    datar = 'SELECT datar FROM users'
-    role = 'SELECT r.name AS name FROM roles AS r LEFT JOIN users AS u ON r.id = u.role_id'
+    connection = sqlite3.connect('test_task_db.sqlite')
+    cursor = connection.cursor()
+    fio = cursor.execute('SELECT fio FROM users')
+    datar = cursor.execute('SELECT datar FROM users')
+    role = cursor.execute('SELECT r.name AS name FROM roles AS r LEFT JOIN users AS u ON r.id = u.role_id')
     expenses = (
         ['ФИО', fio],
         ['Дата рождения', datar],
         ['Наименование роли', role],
     )
-
+    connection.close()
     row = 0
     col = 0
 
